@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>DSJ Autotrader — Support</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&display=swap');
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --brand: #534AB7; --brand-dark: #3C3489; --brand-light: #EEEDFE;
+    --teal: #1D9E75; --teal-light: #E1F5EE; --teal-dark: #085041;
+    --red: #E24B4A; --surface: #ffffff; --surface2: #f7f7f8;
+    --border: rgba(0,0,0,0.08); --text: #1a1a2e; --text2: #5a5a72; --text3: #9090a8;
+  }
+  body { font-family: 'DM Sans', system-ui, sans-serif; background: linear-gradient(135deg, #f0effe 0%, #e8f4f0 50%, #fdf6e8 100%); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 1rem; }
+  .container { width: 100%; max-width: 480px; background: var(--surface); border-radius: 28px; box-shadow: 0 8px 40px rgba(83,74,183,0.15), 0 0 0 1px rgba(83,74,183,0.08); display: flex; flex-direction: column; height: 94vh; max-height: 820px; overflow: hidden; animation: slideUp 0.4s cubic-bezier(0.16,1,0.3,1) both; }
+  @keyframes slideUp { from{opacity:0;transform:translateY(24px)} to{opacity:1;transform:translateY(0)} }
+  .header { background: linear-gradient(135deg, var(--brand) 0%, var(--brand-dark) 100%); padding: 1.1rem 1.25rem; display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+  .hav { width: 42px; height: 42px; border-radius: 50%; background: rgba(255,255,255,0.15); border: 1.5px solid rgba(255,255,255,0.25); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .hav svg { width: 20px; height: 20px; }
+  .hinfo { flex: 1; }
+  .hname { font-size: 15px; font-weight: 600; color: #EEEDFE; }
+  .hstatus { font-size: 12px; color: rgba(238,237,254,0.7); display: flex; align-items: center; gap: 5px; margin-top: 1px; }
+  .sdot { width: 6px; height: 6px; border-radius: 50%; background: #5DCAA5; animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.5} }
+  .voice-toggle { display: flex; align-items: center; gap: 6px; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2); border-radius: 20px; padding: 5px 10px; cursor: pointer; }
+  .voice-toggle span { font-size: 11px; color: #CECBF6; font-weight: 500; }
+  .vt-dot { width: 7px; height: 7px; border-radius: 50%; background: #5DCAA5; flex-shrink: 0; }
+  .vt-dot.off { background: var(--text3); }
+  .messages { flex: 1; overflow-y: auto; padding: 1.25rem; display: flex; flex-direction: column; gap: 14px; scroll-behavior: smooth; }
+  .messages::-webkit-scrollbar { width: 3px; }
+  .messages::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+  .msg { display: flex; gap: 8px; align-items: flex-end; animation: msgIn 0.3s cubic-bezier(0.16,1,0.3,1) both; }
+  @keyframes msgIn { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
+  .msg.user { flex-direction: row-reverse; }
+  .mav { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 600; flex-shrink: 0; margin-bottom: 2px; }
+  .mav.bot { background: var(--brand-light); color: var(--brand); }
+  .mav.user { background: var(--surface2); color: var(--text2); }
+  .bubble { max-width: 80%; padding: 10px 14px; font-size: 13.5px; line-height: 1.65; word-break: break-word; }
+  .bubble.bot { background: var(--surface2); color: var(--text); border-radius: 4px 18px 18px 18px; border: 1px solid var(--border); }
+  .bubble.user { background: var(--brand); color: #EEEDFE; border-radius: 18px 4px 18px 18px; }
+  .bubble.error { background: #FCEBEB; color: #791F1F; border-color: #F7C1C1; }
+  .bot-msg-wrap { display: flex; flex-direction: column; gap: 4px; max-width: 80%; }
+  .speak-btn { align-self: flex-start; display: flex; align-items: center; gap: 5px; padding: 3px 10px; border-radius: 12px; background: var(--surface2); border: 1px solid var(--border); font-size: 11px; color: var(--text2); cursor: pointer; transition: all 0.15s; font-family: 'DM Sans', sans-serif; }
+  .speak-btn:hover { background: var(--brand-light); color: var(--brand); }
+  .speak-btn.speaking { background: var(--teal-light); color: var(--teal-dark); }
+  .speak-btn svg { width: 11px; height: 11px; }
+  .typing-bubble { display: flex; gap: 4px; align-items: center; padding: 12px 16px; background: var(--surface2); border-radius: 4px 18px 18px 18px; border: 1px solid var(--border); }
+  .tdot { width: 6px; height: 6px; border-radius: 50%; background: var(--text3); animation: tb 1.2s infinite; }
+  .tdot:nth-child(2){animation-delay:0.2s} .tdot:nth-child(3){animation-delay:0.4s}
+  @keyframes tb { 0%,60%,100%{transform:translateY(0)} 30%{transform:translateY(-5px)} }
+  .chips-wrap { padding: 0.5rem 1.25rem 0.6rem; flex-shrink: 0; border-top: 1px solid var(--border); }
+  .chips-label { font-size: 10px; font-weight: 600; letter-spacing: 0.08em; color: var(--text3); text-transform: uppercase; margin-bottom: 6px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 5px; }
+  .chip { font-size: 11.5px; padding: 4px 10px; border-radius: 20px; border: 1px solid var(--border); background: var(--surface2); color: var(--text2); cursor: pointer; transition: all 0.15s; font-family: 'DM Sans', sans-serif; white-space: nowrap; }
+  .chip:hover { background: var(--brand-light); color: var(--brand); }
+  .input-area { padding: 0.6rem 1.25rem 1rem; flex-shrink: 0; }
+  .voice-status { display: none; align-items: center; justify-content: center; gap: 8px; padding: 8px; border-radius: 10px; margin-bottom: 6px; font-size: 12px; }
+  .voice-status.listening { display: flex; background: #FCEBEB; color: #791F1F; }
+  .voice-status.speaking { display: flex; background: var(--teal-light); color: var(--teal-dark); }
+  .wave { display: flex; gap: 3px; align-items: center; }
+  .wave-bar { width: 3px; border-radius: 2px; animation: wave 0.8s infinite; }
+  .wave-bar:nth-child(1){height:8px;animation-delay:0s} .wave-bar:nth-child(2){height:14px;animation-delay:0.1s} .wave-bar:nth-child(3){height:10px;animation-delay:0.2s} .wave-bar:nth-child(4){height:16px;animation-delay:0.15s} .wave-bar:nth-child(5){height:8px;animation-delay:0.05s}
+  .voice-status.listening .wave-bar { background: var(--red); }
+  .voice-status.speaking .wave-bar { background: var(--teal); }
+  @keyframes wave { 0%,100%{transform:scaleY(0.5)} 50%{transform:scaleY(1)} }
+  .input-row { display: flex; gap: 8px; align-items: flex-end; background: var(--surface2); border-radius: 16px; border: 1.5px solid var(--border); padding: 8px 8px 8px 14px; transition: border-color 0.15s; }
+  .input-row:focus-within { border-color: var(--brand); background: var(--surface); }
+  textarea { flex: 1; border: none; background: transparent; font-family: 'DM Sans', sans-serif; font-size: 13.5px; color: var(--text); resize: none; outline: none; line-height: 1.5; max-height: 80px; min-height: 22px; padding: 0; }
+  textarea::placeholder { color: var(--text3); }
+  .btn-group { display: flex; gap: 6px; align-items: center; }
+  .mic-btn { width: 36px; height: 36px; border-radius: 10px; background: var(--surface); border: 1.5px solid var(--border); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.15s; flex-shrink: 0; }
+  .mic-btn:hover { border-color: var(--brand); background: var(--brand-light); }
+  .mic-btn.listening { background: var(--red); border-color: var(--red); animation: micPulse 1s infinite; }
+  @keyframes micPulse { 0%,100%{box-shadow:0 0 0 0 rgba(226,75,74,0.4)} 50%{box-shadow:0 0 0 8px rgba(226,75,74,0)} }
+  .mic-btn svg { width: 16px; height: 16px; }
+  .mic-btn.listening svg { stroke: white; }
+  .send-btn { width: 36px; height: 36px; border-radius: 10px; background: var(--brand); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.15s; flex-shrink: 0; }
+  .send-btn:hover { background: var(--brand-dark); transform: scale(1.05); }
+  .send-btn:disabled { background: var(--surface2); cursor: not-allowed; transform: none; }
+  .send-btn svg { width: 15px; height: 15px; }
+  .input-footer { font-size: 11px; color: var(--text3); text-align: center; margin-top: 5px; }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <div class="hav">
+      <svg viewBox="0 0 24 24" fill="none" stroke="rgba(238,237,254,0.9)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+    </div>
+    <div class="hinfo">
+      <div class="hname">DSJ Autotrader Support</div>
+      <div class="hstatus"><span class="sdot"></span>AI-powered · Voice enabled</div>
+    </div>
+    <div class="voice-toggle" onclick="toggleAutoSpeak()" id="auto-speak-toggle">
+      <div class="vt-dot" id="vt-dot"></div>
+      <span id="vt-label">Voice on</span>
+    </div>
+  </div>
+  <div class="messages" id="messages">
+    <div class="msg">
+      <div class="mav bot">AT</div>
+      <div class="bot-msg-wrap">
+        <div class="bubble bot">Hey! I am the DSJ Autotrader assistant. Type your question or tap the mic to speak and I will answer instantly. What would you like to know?</div>
+        <button class="speak-btn" onclick="speakText(this,'Hey! I am the DSJ Autotrader assistant. Type your question or tap the mic to speak and I will answer instantly. What would you like to know?')">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M8 1v14M4 4v8M12 4v8M1 7v2M15 7v2"/></svg>Play reply
+        </button>
+      </div>
+    </div>
+  </div>
+  <div class="chips-wrap" id="chips-wrap">
+    <div class="chips-label">Tap to ask</div>
+    <div class="chips">
+      <button class="chip" onclick="sendChip(this.textContent)">What is DSJ Autotrader?</button>
+      <button class="chip" onclick="sendChip(this.textContent)">How much does it cost?</button>
+      <button class="chip" onclick="sendChip(this.textContent)">Is my info safe?</button>
+      <button class="chip" onclick="sendChip(this.textContent)">How does the bot work?</button>
+      <button class="chip" onclick="sendChip(this.textContent)">How do I sign up?</button>
+      <button class="chip" onclick="sendChip(this.textContent)">What about 2FA?</button>
+      <button class="chip" onclick="sendChip(this.textContent)">Can I cancel anytime?</button>
+      <button class="chip" onclick="sendChip(this.textContent)">What is the referral program?</button>
+    </div>
+  </div>
+  <div class="input-area">
+    <div class="voice-status" id="voice-status">
+      <div class="wave"><div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div></div>
+      <span id="voice-status-text">Listening...</span>
+    </div>
+    <div class="input-row">
+      <textarea id="user-input" placeholder="Type or tap mic to speak..." rows="1" onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
+      <div class="btn-group">
+        <button class="mic-btn" id="mic-btn" onclick="toggleMic()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="11" rx="3"/><path d="M5 10a7 7 0 0014 0M12 19v3M8 22h8"/></svg>
+        </button>
+        <button class="send-btn" id="send-btn" onclick="sendMessage()">
+          <svg viewBox="0 0 16 16" fill="none" stroke="#EEEDFE" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 8h12M8 2l6 6-6 6"/></svg>
+        </button>
+      </div>
+    </div>
+    <div class="input-footer">DSJ Autotrader · Powered by Claude AI</div>
+  </div>
+</div>
+<script>
+const PROXY_URL = 'https://dsj-proxy.aiassistantclone.workers.dev';
+const SYSTEM_PROMPT = `You are the official support and sales assistant for DSJ Autotrader. Be warm, confident, conversational. Keep answers under 4 sentences when possible since replies may be spoken aloud. ABOUT: DSJ Autotrader is a bot running on a private AWS EC2 cloud server. It logs into Bonchat twice daily, reads the DSJ trade signal, then logs into the member DSJ exchange account and posts the trade automatically. The service is for active members of the BG-015 Wealth Sharing Investment Group who use Bonchat. TRADING SCHEDULE: Bot executes trades TWICE per day: 1:00 PM Basic Trading Signal and 7:00 PM Basic Trading Signal. PRICING: Always explain as: $50 one-time setup fee plus $29 first month equals $79 due today. Then just $29 per month automatically after that. Less than $1 a day. 2FA: Members must disable two-factor authentication on their DSJ account before the bot can run. The bot cannot receive SMS verification codes. This is completely safe because credentials are stored on an encrypted private server. To disable 2FA go to DSJ account Security Settings and turn it off. SECURITY: Credentials collected via encrypted Jotform — never stored in a spreadsheet. AWS Secrets Manager bank-grade encryption — even the service owner cannot read passwords. Each member gets their own isolated private server container. Bot does ONE thing only: login, read signal, post trade. All credentials permanently deleted within MINUTES of cancellation — deletion begins the moment cancellation is confirmed. SSL encryption on all data in transit. PAYMENT: Stripe handles everything automatically. Card saved at signup. $29 auto-charged every 30 days. Renewal reminder 3 days before charge. Failed payments automatically retried. Cancel anytime. REFERRAL: Leaders get a unique referral link. Earn $10 per confirmed signup plus $3 per month per active referral. Refer 5 or more members and your subscription is free. MARKETING: Naturally weave in: The DSJ system only works if you show up every day — this bot shows up for you. At less than $1 a day it costs less than a coffee. Bot live within 1 hour of payment and form confirmation.`;
+let history=[], loading=false, autoSpeak=localStorage.getItem('dsj_auto_speak')!=='false', recognition=null, listening=false, currentUtt=null;
+function init(){updateToggle();}
+function updateToggle(){document.getElementById('vt-dot').className=autoSpeak?'vt-dot':'vt-dot off';document.getElementById('vt-label').textContent=autoSpeak?'Voice on':'Voice off';}
+function toggleAutoSpeak(){autoSpeak=!autoSpeak;localStorage.setItem('dsj_auto_speak',autoSpeak);updateToggle();if(!autoSpeak&&currentUtt){speechSynthesis.cancel();clearBtns();}}
+function clearBtns(){document.querySelectorAll('.speak-btn.speaking').forEach(b=>{b.classList.remove('speaking');b.innerHTML=pIcon()+'Play reply';});}
+function pIcon(){return'<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M8 1v14M4 4v8M12 4v8M1 7v2M15 7v2"/></svg>';}
+function sIcon(){return'<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="4" y="4" width="8" height="8" rx="1" fill="currentColor"/></svg>';}
+function speakText(btn,text){if(!('speechSynthesis' in window))return;if(btn.classList.contains('speaking')){speechSynthesis.cancel();btn.classList.remove('speaking');btn.innerHTML=pIcon()+'Play reply';setVS(null);return;}speechSynthesis.cancel();clearBtns();const u=new SpeechSynthesisUtterance(text);u.rate=0.95;const vs=speechSynthesis.getVoices();const pv=vs.find(v=>v.name.includes('Samantha')||v.name.includes('Karen')||v.name.includes('Google US English')||(v.lang==='en-US'&&v.localService));if(pv)u.voice=pv;currentUtt=u;btn.classList.add('speaking');btn.innerHTML=sIcon()+'Stop';setVS('speaking');u.onend=u.onerror=()=>{btn.classList.remove('speaking');btn.innerHTML=pIcon()+'Play reply';setVS(null);currentUtt=null;};speechSynthesis.speak(u);}
+function setVS(m){const el=document.getElementById('voice-status');const tx=document.getElementById('voice-status-text');el.className='voice-status';if(m==='listening'){el.classList.add('listening');tx.textContent='Listening — speak now...';}else if(m==='speaking'){el.classList.add('speaking');tx.textContent='Speaking reply...';}}
+function toggleMic(){if(listening){if(recognition)recognition.stop();return;}const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR){alert('Voice input requires Chrome on Android or Safari on iPhone.');return;}if(currentUtt)speechSynthesis.cancel();recognition=new SR();recognition.lang='en-US';recognition.interimResults=true;recognition.onstart=()=>{listening=true;document.getElementById('mic-btn').classList.add('listening');setVS('listening');document.getElementById('user-input').placeholder='Listening...';};recognition.onresult=e=>{const t=Array.from(e.results).map(r=>r[0].transcript).join('');document.getElementById('user-input').value=t;autoResize(document.getElementById('user-input'));};recognition.onend=()=>{listening=false;document.getElementById('mic-btn').classList.remove('listening');setVS(null);document.getElementById('user-input').placeholder='Type or tap mic to speak...';const t=document.getElementById('user-input').value.trim();if(t)setTimeout(()=>sendMessage(),300);};recognition.onerror=()=>{listening=false;document.getElementById('mic-btn').classList.remove('listening');setVS(null);document.getElementById('user-input').placeholder='Type or tap mic to speak...';};try{recognition.start();}catch(e){}}
+function autoResize(el){el.style.height='auto';el.style.height=Math.min(el.scrollHeight,80)+'px';}
+function handleKey(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMessage();}}
+function sendChip(t){document.getElementById('user-input').value=t;sendMessage();}
+function addUser(t){const d=document.createElement('div');d.className='msg user';d.innerHTML=`<div class="mav user">You</div><div class="bubble user">${esc(t)}</div>`;document.getElementById('messages').appendChild(d);scr();}
+function addBot(t){const c=t.replace(/<[^>]*>/g,'');const d=document.createElement('div');d.className='msg';d.innerHTML=`<div class="mav bot">AT</div><div class="bot-msg-wrap"><div class="bubble bot">${esc(t)}</div><button class="speak-btn" onclick="speakText(this,${JSON.stringify(c)})">${pIcon()}Play reply</button></div>`;document.getElementById('messages').appendChild(d);scr();if(autoSpeak){const b=d.querySelector('.speak-btn');setTimeout(()=>{if(b)speakText(b,c);},400);}}
+function addErr(t){const d=document.createElement('div');d.className='msg';d.innerHTML=`<div class="mav bot">AT</div><div class="bubble bot error">${esc(t)}</div>`;document.getElementById('messages').appendChild(d);scr();}
+function showTyping(){const d=document.createElement('div');d.className='msg';d.id='typing';d.innerHTML='<div class="mav bot">AT</div><div class="typing-bubble"><div class="tdot"></div><div class="tdot"></div><div class="tdot"></div></div>';document.getElementById('messages').appendChild(d);scr();}
+function removeTyping(){const t=document.getElementById('typing');if(t)t.remove();}
+function scr(){const m=document.getElementById('messages');m.scrollTop=m.scrollHeight;}
+function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');}
+async function sendMessage(){const input=document.getElementById('user-input');const text=input.value.trim();if(!text||loading)return;input.value='';input.style.height='auto';loading=true;document.getElementById('send-btn').disabled=true;document.getElementById('chips-wrap').style.display='none';addUser(text);history.push({role:'user',content:text});showTyping();try{const res=await fetch(PROXY_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1024,system:SYSTEM_PROMPT,messages:history})});removeTyping();if(!res.ok){addErr('Something went wrong. Please try again.');}else{const data=await res.json();const reply=data.content?.[0]?.text||"Could not generate a response. Please try again.";history.push({role:'assistant',content:reply});addBot(reply);}}catch(e){removeTyping();addErr('Connection error. Please check your internet and try again.');}loading=false;document.getElementById('send-btn').disabled=false;input.focus();}
+speechSynthesis.onvoiceschanged=()=>{};init();
+</script>
+</body>
+</html>
