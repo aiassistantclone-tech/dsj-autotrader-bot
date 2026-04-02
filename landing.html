@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DSJ Autotrader — Never Miss a Trade Again</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap');
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --brand:#534AB7;--brand-dark:#3C3489;--brand-light:#EEEDFE;
+  --teal:#1D9E75;--teal-light:#E1F5EE;--teal-dark:#085041;
+  --text:#111;--text2:#444;--text3:#888;
+  --border:#e5e5e5;--surface:#fff;--surface2:#f8f8f8;
+}
+html{scroll-behavior:smooth}
+body{font-family:'Space Grotesk',sans-serif;background:#fff;color:var(--text);line-height:1.6}
+
+/* NAV */
+nav{display:flex;align-items:center;justify-content:space-between;padding:16px 24px;border-bottom:2px solid var(--text);position:sticky;top:0;background:#fff;z-index:100}
+.nav-logo{font-family:'Space Mono',monospace;font-weight:700;font-size:13px;color:var(--text)}
+.nav-logo span{color:var(--brand)}
+.nav-cta{background:var(--text);color:#fff;border:none;padding:8px 16px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;font-family:'Space Grotesk',sans-serif;text-decoration:none}
+
+/* HERO */
+.hero{background:#111;padding:52px 24px 0;text-align:center}
+.hero-tag{display:inline-block;background:var(--brand);color:#EEEDFE;font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;padding:5px 12px;border-radius:4px;margin-bottom:20px}
+.hero h1{font-size:clamp(32px,7vw,52px);font-weight:700;line-height:1.05;color:#fff;margin-bottom:16px;letter-spacing:-1px}
+.hero h1 .accent{color:#5DCAA5}
+.hero-sub{font-size:15px;color:#888;line-height:1.7;max-width:480px;margin:0 auto 32px}
+.hero-price-strip{background:#5DCAA5;padding:14px 24px;display:flex;align-items:center;justify-content:space-between;max-width:480px;margin:0 auto;border-radius:10px 10px 0 0}
+.hero-price-left .t1{font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#085041}
+.hero-price-left .t2{font-family:'Space Mono',monospace;font-size:28px;font-weight:700;color:#04342C;line-height:1}
+.hero-price-left .t3{font-size:11px;color:#085041}
+.hero-price-btn{background:#04342C;color:#5DCAA5;border:none;padding:12px 20px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Space Grotesk',sans-serif;white-space:nowrap;text-decoration:none;display:inline-block}
+
+/* TICKER */
+.ticker{background:#f5f5f5;border-top:2px solid var(--text);border-bottom:2px solid var(--text);padding:10px 24px;display:flex;gap:24px;overflow:hidden;flex-wrap:wrap}
+.tick{display:flex;align-items:center;gap:6px;font-size:11px;color:#555;white-space:nowrap;font-weight:500}
+.tdot{width:6px;height:6px;border-radius:50%;background:#5DCAA5;flex-shrink:0}
+
+/* SECTIONS */
+.section{padding:48px 24px;max-width:640px;margin:0 auto}
+.section-num{font-family:'Space Mono',monospace;font-size:10px;font-weight:700;color:var(--brand);display:block;margin-bottom:4px}
+.section-title{font-size:22px;font-weight:700;color:var(--text);margin-bottom:20px;letter-spacing:-0.3px}
+
+/* STEPS GRID */
+.steps-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:0}
+.step-card{border:2px solid var(--border);border-radius:10px;padding:14px}
+.step-card.hi{border-color:var(--brand);background:var(--brand-light)}
+.step-num{font-family:'Space Mono',monospace;font-size:10px;color:#aaa;margin-bottom:6px}
+.step-card.hi .step-num{color:var(--brand)}
+.step-t{font-size:13px;font-weight:700;color:var(--text);margin-bottom:3px}
+.step-card.hi .step-t{color:#3C3489}
+.step-s{font-size:11px;color:#888;line-height:1.5}
+
+/* SCHEDULE */
+.schedule{border:2px solid #5DCAA5;border-radius:10px;padding:16px;margin-bottom:0}
+.sch-label{font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#0F6E56;margin-bottom:12px}
+.sch-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid #d8f5ed}
+.sch-row:last-child{border-bottom:none}
+.sch-time{font-family:'Space Mono',monospace;font-size:16px;font-weight:700;color:#085041}
+.sch-type{font-size:12px;color:#1D9E75;font-weight:500}
+.sch-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px}
+.badge-all{background:#E1F5EE;color:#085041}
+.badge-l2{background:#EEEDFE;color:#3C3489}
+.sch-dot{width:7px;height:7px;border-radius:50%;background:#5DCAA5;animation:blink 2s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.3}}
+
+/* PRICING */
+.pricing-box{background:#111;border-radius:10px;padding:18px;margin-bottom:0}
+.pricing-label{font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#555;margin-bottom:12px}
+.pricing-row{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #222;font-size:12px}
+.pricing-row:last-child{border-bottom:none;padding-top:10px;margin-top:4px}
+.pricing-row .l{color:#888}
+.pricing-row .r{color:#fff;font-weight:600;font-family:'Space Mono',monospace}
+.pricing-row.tot .l{color:#fff;font-weight:700;font-size:14px}
+.pricing-row.tot .r{color:#5DCAA5;font-size:22px}
+.pricing-sub{font-size:11px;color:#555;text-align:center;margin-top:10px}
+
+/* SECURITY */
+.sec-list{margin-bottom:0}
+.sec-row{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)}
+.sec-row:last-child{border-bottom:none}
+.sec-badge{font-family:'Space Mono',monospace;font-size:9px;font-weight:700;padding:3px 7px;border-radius:4px;flex-shrink:0;margin-top:1px}
+.aws{background:#FAEEDA;color:#633806}
+.prv{background:#f0f0f0;color:#444}
+.tls{background:#E1F5EE;color:#085041}
+.del{background:#EEEDFE;color:#3C3489}
+.one{background:#f0f0f0;color:#444}
+.sec-text{font-size:12px;color:#555;line-height:1.5}
+.sec-text strong{color:var(--text);font-weight:600}
+
+/* 2FA EXPLAINER */
+.twofa-box{background:#FAEEDA;border:1px solid #FAC775;border-radius:10px;padding:16px;margin-top:16px}
+.twofa-title{font-size:13px;font-weight:700;color:#633806;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.twofa-title svg{width:16px;height:16px;flex-shrink:0}
+.twofa-text{font-size:12px;color:#854F0B;line-height:1.7}
+
+/* FINAL CTA */
+.final-cta{background:var(--brand);padding:48px 24px;text-align:center}
+.final-cta h2{font-size:24px;font-weight:700;color:#fff;margin-bottom:8px;letter-spacing:-0.3px}
+.final-cta p{font-size:13px;color:#AFA9EC;margin-bottom:24px;line-height:1.6}
+.final-btn{display:inline-block;background:#fff;color:var(--brand);border:none;padding:16px 32px;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;font-family:'Space Grotesk',sans-serif;text-decoration:none;width:100%;max-width:400px}
+.final-sub{font-size:11px;color:#AFA9EC;margin-top:10px}
+
+/* FOOTER */
+footer{background:#111;padding:24px;text-align:center}
+footer p{font-size:12px;color:#555}
+footer a{color:#888;text-decoration:none}
+
+/* CHAT BUBBLE */
+.chat-bubble{position:fixed;bottom:24px;right:24px;z-index:1000}
+.chat-btn{width:56px;height:56px;border-radius:50%;background:var(--brand);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(83,74,183,0.4)}
+.chat-btn svg{width:24px;height:24px}
+.chat-badge{position:absolute;top:-4px;right:-4px;width:18px;height:18px;border-radius:50%;background:#5DCAA5;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#04342C}
+.chat-frame{position:fixed;bottom:90px;right:24px;width:360px;height:500px;border-radius:20px;overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,0.2);display:none;z-index:999}
+.chat-frame.open{display:block}
+.chat-close{position:absolute;top:10px;right:14px;background:rgba(255,255,255,0.2);border:none;color:#fff;font-size:16px;cursor:pointer;border-radius:50%;width:28px;height:28px;display:flex;align-items:center;justify-content:center;z-index:10}
+@media(max-width:400px){.chat-frame{width:calc(100vw - 32px);right:16px}}
+
+.divider{border:none;border-top:2px solid var(--border);margin:0}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo">DSJ_<span>AUTOTRADER</span></div>
+  <a href="#signup" class="nav-cta">Get started</a>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-tag">BG-015 Wealth Sharing Investment Group · Automated Trading</div>
+  <h1>Never let a busy day<br><span class="accent">cost you a trade.</span></h1>
+  <p style="font-size:18px;font-weight:600;color:#5DCAA5;margin-bottom:8px;letter-spacing:-0.3px">1pm and 7pm. Every day. With or without you.</p>
+  <p class="hero-sub">Consistent trades. Consistent growth. Zero effort. Your DSJ signals posted automatically — no matter where you are or what you're doing.</p>
+  <div style="max-width:480px;margin:0 auto">
+    <div class="hero-price-strip">
+      <div class="hero-price-left">
+        <div class="t1">Get started today</div>
+        <div class="t2">$29<span style="font-size:14px">/mo</span></div>
+        <div class="t3">No setup fee · Cancel anytime</div>
+      </div>
+      <a href="#signup" class="hero-price-btn">Start now →</a>
+    </div>
+  </div>
+</div>
+
+<div class="ticker">
+  <div class="tick"><span class="tdot"></span>Bot live in 1 hour</div>
+  <div class="tick"><span class="tdot"></span>2 trades per day</div>
+  <div class="tick"><span class="tdot"></span>Level 2 — 3 trades per day</div>
+  <div class="tick"><span class="tdot"></span>Cancel anytime</div>
+  <div class="tick"><span class="tdot"></span>Secure private server</div>
+  <div class="tick"><span class="tdot"></span>Never miss a signal</div>
+</div>
+
+<!-- HOW IT WORKS -->
+<div class="section">
+  <span class="section-num">01 —</span>
+  <div class="section-title">How it works</div>
+  <div class="steps-grid">
+    <div class="step-card hi">
+      <div class="step-num">STEP 01</div>
+      <div class="step-t">Fill the signup form</div>
+      <div class="step-s">Enter your contact info and account credentials securely. Takes about 5 minutes.</div>
+    </div>
+    <div class="step-card">
+      <div class="step-num">STEP 02</div>
+      <div class="step-t">Pay $29 to activate</div>
+      <div class="step-s">First month payment. Secure checkout via Stripe. No setup fee.</div>
+    </div>
+    <div class="step-card">
+      <div class="step-num">STEP 03</div>
+      <div class="step-t">Bot goes live</div>
+      <div class="step-s">Your secure private server is configured and running within 1 hour.</div>
+    </div>
+    <div class="step-card">
+      <div class="step-num">EVERY DAY</div>
+      <div class="step-t">You do nothing</div>
+      <div class="step-s">Sleep, work, travel — your bot never misses a trade signal.</div>
+    </div>
+  </div>
+</div>
+
+<hr class="divider">
+
+<!-- SCHEDULE -->
+<div class="section">
+  <span class="section-num">02 —</span>
+  <div class="section-title">Daily trade schedule</div>
+  <div class="schedule">
+    <div class="sch-label">Live signal execution times · All times EST</div>
+    <div class="sch-row">
+      <div class="sch-time">1:00 PM</div>
+      <div class="sch-type">Basic Trading Signal</div>
+      <div class="sch-badge badge-all">All members</div>
+      <div class="sch-dot"></div>
+    </div>
+    <div class="sch-row">
+      <div class="sch-time">7:00 PM</div>
+      <div class="sch-type">Basic Trading Signal</div>
+      <div class="sch-badge badge-all">All members</div>
+      <div class="sch-dot"></div>
+    </div>
+    <div class="sch-row">
+      <div class="sch-time">8:00 PM</div>
+      <div class="sch-type">Permanent Dynamic Signal</div>
+      <div class="sch-badge badge-l2">Level 2+</div>
+      <div class="sch-dot"></div>
+    </div>
+  </div>
+  <div class="twofa-box">
+    <div class="twofa-title">
+      <svg viewBox="0 0 16 16" fill="none" stroke="#854F0B" stroke-width="1.5" stroke-linecap="round"><circle cx="8" cy="8" r="7"/><path d="M8 5v3.5M8 11v.5"/></svg>
+      Important: 2FA must be disabled on your DSJ account
+    </div>
+    <div class="twofa-text">Your bot logs in automatically — it cannot receive SMS verification codes. You must disable two-factor authentication in your DSJ account Security Settings before your bot can run. This is completely safe because your credentials are stored on an encrypted private server using bank-grade AWS Secrets Manager — far more secure than a text message code.</div>
+  </div>
+</div>
+
+<hr class="divider">
+
+<!-- PRICING -->
+<div class="section">
+  <span class="section-num">03 —</span>
+  <div class="section-title">Simple pricing</div>
+  <div class="pricing-box">
+    <div class="pricing-label">What you pay</div>
+    <div class="pricing-row"><span class="l">Monthly subscription</span><span class="r">$29.00</span></div>
+    <div class="pricing-row"><span class="l">Setup fee</span><span class="r">$0.00</span></div>
+    <div class="pricing-row tot"><span class="l">Due today</span><span class="r">$29</span></div>
+  </div>
+  <div class="pricing-sub">Then $29 automatically every month · Cancel anytime · No contracts</div>
+</div>
+
+<hr class="divider">
+
+<!-- SECURITY -->
+<div class="section">
+  <span class="section-num">04 —</span>
+  <div class="section-title">Bank-grade security</div>
+  <div class="sec-list">
+    <div class="sec-row"><span class="sec-badge aws">AWS</span><span class="sec-text"><strong>Secrets Manager encryption</strong> — same technology used by banks and Fortune 500 companies. Your password is encrypted the moment it's received.</span></div>
+    <div class="sec-row"><span class="sec-badge prv">PRIVATE</span><span class="sec-text"><strong>Your own secure private container</strong> — dedicated to your account only, never shared with any other member.</span></div>
+    <div class="sec-row"><span class="sec-badge tls">TLS</span><span class="sec-text"><strong>All data encrypted in transit</strong> — no plain text transmission anywhere in the system.</span></div>
+    <div class="sec-row"><span class="sec-badge one">ONE TASK</span><span class="sec-text"><strong>Bot does one thing only</strong> — log in, read the signal, post the trade. It cannot access anything else on your account.</span></div>
+    <div class="sec-row"><span class="sec-badge del">DELETED</span><span class="sec-text"><strong>All credentials permanently deleted within minutes of cancellation</strong> — no archive, no backup, completely gone the moment you cancel.</span></div>
+  </div>
+</div>
+
+<hr class="divider">
+
+<!-- FINAL CTA -->
+<div class="final-cta" id="signup">
+  <h2>Stop missing trades.</h2>
+  <p>The DSJ system only works if you show up every day.<br>This bot shows up for you — at 1pm and 7pm, every single day.</p>
+  <a href="#signup-form" class="final-btn" id="signup-btn">Get started — $29/month</a>
+  <div class="final-sub">No setup fee · Secure private server · Bot live in 1 hour · Cancel anytime</div>
+</div>
+
+<!-- SIGNUP FORM -->
+<div id="signup-form" style="background:#f8f8f8;padding:48px 24px">
+  <div style="max-width:520px;margin:0 auto">
+    <div style="background:#534AB7;border-radius:14px 14px 0 0;padding:20px 24px">
+      <div style="font-family:'Space Mono',monospace;font-weight:700;font-size:14px;color:#EEEDFE;margin-bottom:4px">DSJ_AUTOTRADER — Member Setup</div>
+      <div style="font-size:12px;color:#AFA9EC">Your bot will be live within 1 hour. All credential fields are encrypted end-to-end.</div>
+    </div>
+    <div style="background:#3C3489;padding:10px 24px;display:flex;align-items:center;gap:8px">
+      <div style="width:7px;height:7px;border-radius:50%;background:#5DCAA5;flex-shrink:0"></div>
+      <div style="font-size:12px;color:#CECBF6" id="ref-banner">Secure signup · All fields are encrypted end-to-end</div>
+    </div>
+    <div style="background:#fff;border:0.5px solid #e5e5e5;border-top:none;border-radius:0 0 14px 14px;padding:24px">
+
+      <!-- ACTIVATION BADGE -->
+      <div style="display:inline-flex;align-items:center;gap:6px;background:#E1F5EE;border-radius:20px;padding:5px 14px;margin-bottom:20px">
+        <div style="width:7px;height:7px;border-radius:50%;background:#1D9E75"></div>
+        <span style="font-size:12px;font-weight:600;color:#085041">Bot activation within 1 hour of payment + form confirmation</span>
+      </div>
+
+      <!-- PERSONAL INFO -->
+      <div style="font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#aaa;margin-bottom:12px">Personal info</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
+        <div>
+          <label style="font-size:12px;font-weight:600;color:#111;display:block;margin-bottom:4px">First name <span style="color:#E24B4A">*</span></label>
+          <input type="text" placeholder="James" style="width:100%;border:1px solid #e5e5e5;border-radius:8px;padding:8px 10px;font-size:13px;font-family:'Space Grotesk',sans-serif">
+        </div>
+        <div>
+          <label style="font-size:12px;font-weight:600;color:#111;display:block;margin-bottom:4px">Last name <span style="color:#E24B4A">*</span></label>
+          <input type="text" placeholder="Wilson" style="width:100%;border:1px solid #e5e5e5;border-radius:8px;padding:8px 10px;font-size:13px;font-family:'Space Grotesk',sans-serif">
+        </div>
+      </div>
+      <div style="margin-bottom:12px">
+        <label style="font-size:12px;font-weight:600;color:#111;display:block;margin-bottom:4px">Email address <span style="color:#E24B4A">*</span></label>
+        <input type="email" placeholder="you@email.com" style="width:100%;border:1px solid #e5e5e5;border-radius:8px;padding:8px 10px;font-size:13px;font-family:'Space Grotesk',sans-serif">
+      </div>
+      <div style="margin-bottom:20px">
+        <label style="font-size:12px;font-weight:600;color:#111;display:block;margin-bottom:4px">WhatsApp / phone <span style="color:#E24B4A">*</span></label>
+        <div style="display:grid;grid-template-columns:130px 1fr;gap:8px">
+          <select style="border:1px solid #e5e5e5;border-radius:8px;padding:8px 10px;font-size:12px;font-family:'Space Grotesk',sans-serif;background:#fff">
+            <option>+1 US/CA</option><option>+44 UK</option><option>+234 Nigeria</option><option>+27 S.Africa</option><option>+233 Ghana</option><option>+254 Kenya</option><option>+263 Zimbabwe</option><option>+61 Australia</option><option>+91 India</option><option>+1 868 Trinidad</option><option>+1 876 Jamaica</option><option>Other</option>
+          </select>
+          <input type="tel" placeholder="Phone number" style="border:1px solid #e5e5e5;border-radius:8px;padding:8px 10px;font-size:13px;font-family:'Space Grotesk',sans-serif">
+        </div>
+      </div>
+
+      <!-- ACCOUNT NICKNAME -->
+      <div style="margin-bottom:20px">
+        <label style="font-size:12px;font-weight:600;color:#111;display:block;margin-bottom:4px">Account nickname <span style="color:#E24B4A">*</span></label>
+        <div style="font-size:11px;color:#888;margin-bottom:6px">Give your bot a name so you can identify it (e.g. "My Main Account")</div>
+        <input type="text" placeholder="e.g. My Main Account" style="width:100%;border:1px solid #e5e5e5;border-radius:8px;padding:8px 10px;font-size:13px;font-family:'Space Grotesk',sans-serif">
+      </div>
+
+      <!-- DSJ ACCOUNT -->
+      <div style="font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#aaa;margin-bottom:10px;border-top:1px solid #f0f0f0;padding-top:16px">DSJ Exchange account</div>
+      <div style="background:#EEEDFE;border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:12px;color:#3C3489;line-height:1.6">Your DSJ credentials are encrypted using AWS Secrets Manager — the same bank-grade technology used for all credentials. Never stored in any spreadsheet or visible to any person, including the service owner.</div>
+
+      <!-- 2FA WARNING -->
+      <div style="background:#FAEEDA;border:1px solid #FAC775;border-radius:8px;padding:12px 14px;margin-bottom:12px">
+        <div style="font-size:12px;font-weight:700;color:#633806;margin-bottom:4px">⚠ Action required before submitting</div>
+        <div style="font-size:11px;color:#854F0B;line-height:1.6">You must <strong>disable two-factor authentication (2FA)</strong> on your DSJ account before your bot can run. Go to DSJ account → Security Settings → turn off 2FA. Takes less than 2 minutes. Your credentials are protected by bank-grade encryption — 2FA is not needed.</div>
+      </div>
+
+      <div style="margin-bottom:12px">
+        <label style="font-size:12px;font-weight:600;color:#111;display:block;margin-bottom:4px">DSJ mobile number <span style="color:#E24B4A">*</span></label>
+        <div style="display:grid;grid-template-columns:130px 1fr;gap:8px">
+          <select style="border:1px solid #e5e5e5;border-radius:8px;padding:8px 10px;font-size:12px;font-family:'Space Grotesk',sans-serif;background:#fff">
+            <option>+1 US/CA</option><option>+44 UK</option><option>+234 Nigeria</option><option>+27 S.Africa</option><option>+233 Ghana</option><option>+254 Kenya</option><option>+263 Zimbabwe</option><option>+61 Australia</option><option>+91 India</option><option>+1 868 Trinidad</option><option>+1 876 Jamaica</option><option>Other</option>
+          </select>
+          <input type="tel" placeholder="Mobile number" style="border:1px solid #e5e5e5;border-radius:8px;padding:8px 10px;font-size:13px;font-family:'Space Grotesk',sans-serif">
+        </div>
+      </div>
+      <div style="margin-bottom:20px">
+        <label style="font-size:12px;font-weight:600;color:#111;display:block;margin-bottom:4px">DSJ password <span style="color:#E24B4A">*</span></label>
+        <div style="font-size:11px;color:#888;margin-bottom:6px">Encrypted immediately on submission</div>
+        <input type="password" placeholder="••••••••••••" style="width:100%;border:1px solid #e5e5e5;border-radius:8px;padding:8px 10px;font-size:13px;font-family:'Space Grotesk',sans-serif">
+      </div>
+
+      <!-- BONCHAT -->
+      <div style="font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#aaa;margin-bottom:10px;border-top:1px solid #f0f0f0;padding-top:16px">Bonchat account</div>
+      <div style="background:#FAEEDA;border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:12px;color:#633806;line-height:1.6">All Bonchat credentials are encrypted end-to-end using AWS Secrets Manager. No human can read them — only your bot uses them.</div>
+
+      <div style="margin-bottom:12px">
+        <label style="font-size:12px;font-weight:600;color:#111;display:block;margin-bottom:4px">Bonchat server name <span style="color:#E24B4A">*</span></label>
+        <div style="font-size:11px;color:#888;margin-bottom:6px">The server your DSJ group uses (e.g. BG-015)</div>
+        <input type="text" placeholder="e.g. BG2026" style="width:100%;border:1px solid #e5e5e5;border-radius:8px;padding:8px 10px;font-size:13px;font-family:'Space Grotesk',sans-serif">
+      </div>
+      <div style="margin-bottom:12px">
+        <label style="font-size:12px;font-weight:600;color:#111;display:block;margin-bottom:4px">Bonchat phone number <span style="color:#E24B4A">*</span></label>
+        <div style="display:grid;grid-template-columns:130px 1fr;gap:8px">
+          <select style="border:1px solid #e5e5e5;border-radius:8px;padding:8px 10px;font-size:12px;font-family:'Space Grotesk',sans-serif;background:#fff">
+            <option>+1 US/CA</option><option>+44 UK</option><option>+234 Nigeria</option><option>+27 S.Africa</option><option>+233 Ghana</option><option>+254 Kenya</option><option>+263 Zimbabwe</option><option>+61 Australia</option><option>+91 India</option><option>+1 868 Trinidad</option><option>+1 876 Jamaica</option><option>Other</option>
+          </select>
+          <input type="tel" placeholder="Phone number" style="border:1px solid #e5e5e5;border-radius:8px;padding:8px 10px;font-size:13px;font-family:'Space Grotesk',sans-serif">
+        </div>
+      </div>
+      <div style="margin-bottom:20px">
+        <label style="font-size:12px;font-weight:600;color:#111;display:block;margin-bottom:4px">Bonchat password <span style="color:#E24B4A">*</span></label>
+        <input type="password" placeholder="••••••••••••" style="width:100%;border:1px solid #e5e5e5;border-radius:8px;padding:8px 10px;font-size:13px;font-family:'Space Grotesk',sans-serif">
+      </div>
+
+      <!-- LEVEL 2 -->
+      <div style="border-top:1px solid #f0f0f0;padding-top:16px;margin-bottom:20px">
+        <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer">
+          <input type="checkbox" id="level2-check" style="margin-top:2px;flex-shrink:0" onchange="toggleLevel2(this)">
+          <div>
+            <div style="font-size:13px;font-weight:600;color:#111">I am a Level 2 member — add the 8:00 PM Permanent Dynamic Trading Signal</div>
+            <div style="font-size:11px;color:#888;margin-top:2px">Only available to Level 2 members and above in the BG-015 Wealth Sharing Investment Group. No extra charge.</div>
+          </div>
+        </label>
+        <div id="level2-confirm" style="display:none;background:#EEEDFE;border-radius:8px;padding:10px 14px;margin-top:10px;font-size:12px;color:#3C3489">
+          Your bot will execute all three daily signals: 1:00 PM, 7:00 PM, and 8:00 PM EST.
+        </div>
+      </div>
+
+      <!-- PRICING SUMMARY -->
+      <div style="background:#f8f8f8;border-radius:10px;padding:16px;margin-bottom:16px;border:1px solid #e5e5e5">
+        <div style="font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#aaa;margin-bottom:10px">Payment summary</div>
+        <div style="display:flex;justify-content:space-between;font-size:12px;padding:4px 0;border-bottom:1px solid #e5e5e5">
+          <span style="color:#888">Monthly subscription</span><span style="font-weight:600">$29.00</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:12px;padding:4px 0;border-bottom:1px solid #e5e5e5">
+          <span style="color:#888">Setup fee</span><span style="font-weight:600;color:#1D9E75">$0.00</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;padding:8px 0 0;align-items:center">
+          <span style="font-size:14px;font-weight:700;color:#111">Due today</span>
+          <span style="font-size:22px;font-weight:700;color:#534AB7;font-family:'Space Mono',monospace">$29.00</span>
+        </div>
+        <div style="font-size:11px;color:#888;margin-top:6px;text-align:right">then $29.00/month · cancel anytime</div>
+      </div>
+
+      <!-- CONSENT -->
+      <div style="background:#f8f8f8;border:0.5px solid #e5e5e5;border-radius:8px;padding:14px;margin-bottom:16px">
+        <div style="font-size:12px;color:#888;margin-bottom:8px">By submitting you confirm that:</div>
+        <label style="display:flex;gap:8px;align-items:flex-start;font-size:12px;color:#111;cursor:pointer;margin-bottom:6px"><input type="checkbox" style="margin-top:2px;flex-shrink:0">I am an active BG-015 Wealth Sharing Investment Group member</label>
+        <label style="display:flex;gap:8px;align-items:flex-start;font-size:12px;color:#111;cursor:pointer;margin-bottom:6px"><input type="checkbox" style="margin-top:2px;flex-shrink:0">I have disabled 2FA on my DSJ account</label>
+        <label style="display:flex;gap:8px;align-items:flex-start;font-size:12px;color:#111;cursor:pointer"><input type="checkbox" style="margin-top:2px;flex-shrink:0">I authorize DSJ Autotrader to execute daily trades on my behalf</label>
+      </div>
+
+      <button style="width:100%;padding:14px;background:#534AB7;color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Space Grotesk',sans-serif">Submit and proceed to payment — $29.00</button>
+      <div style="font-size:11px;color:#aaa;text-align:center;margin-top:8px">Bot live within 1 hour of payment + form confirmation · Secure payment via Stripe</div>
+
+      <!-- SUPPORT -->
+      <div style="text-align:center;margin-top:16px;padding-top:16px;border-top:1px solid #f0f0f0">
+        <div style="font-size:12px;color:#888">Questions? Contact support</div>
+        <a href="https://wa.me/12054753209" style="font-size:13px;font-weight:600;color:#1D9E75;text-decoration:none">WhatsApp: +1 (205) 475-3209</a>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <p style="margin-bottom:6px">DSJ Autotrader · For BG-015 Wealth Sharing Investment Group members</p>
+  <p>Support: <a href="https://wa.me/12054753209">WhatsApp +1 (205) 475-3209</a> · <a href="#">Privacy Policy</a> · <a href="#">Terms of Service</a></p>
+  <p style="margin-top:8px;font-size:11px;color:#333">For best experience including voice replies on the support chat, open this page in Safari on iPhone or Chrome on Android.</p>
+</footer>
+
+<!-- FLOATING CHAT -->
+<div class="chat-bubble">
+  <div class="chat-frame" id="chat-frame">
+    <button class="chat-close" onclick="toggleChat()">✕</button>
+    <iframe src="https://aiassistantclone-tech.github.io/dsj-autotrader-bot" style="width:100%;height:100%;border:none"></iframe>
+  </div>
+  <button class="chat-btn" onclick="toggleChat()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+    <div class="chat-badge">?</div>
+  </button>
+</div>
+
+<script>
+// Read referral from URL and show in banner
+function getRef() {
+  const params = new URLSearchParams(window.location.search);
+  return params.get('ref') || null;
+}
+const ref = getRef();
+if (ref) {
+  document.getElementById('ref-banner').textContent = 'Referred by: ' + ref + ' — your signup is automatically tracked';
+}
+
+// Toggle chat
+function toggleChat() {
+  document.getElementById('chat-frame').classList.toggle('open');
+}
+
+// Level 2 toggle
+function toggleLevel2(cb) {
+  document.getElementById('level2-confirm').style.display = cb.checked ? 'block' : 'none';
+}
+
+// Smooth scroll signup button
+document.getElementById('signup-btn').addEventListener('click', function(e) {
+  e.preventDefault();
+  document.getElementById('signup-form').scrollIntoView({ behavior: 'smooth' });
+});
+</script>
+</body>
+</html>
