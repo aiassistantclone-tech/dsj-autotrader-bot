@@ -2,206 +2,511 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>DSJ Autotrader — Support</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DSJ Autotrader — Never Miss a Trade Again</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&display=swap');
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  :root {
-    --brand: #534AB7; --brand-dark: #3C3489; --brand-light: #EEEDFE;
-    --teal: #1D9E75; --teal-light: #E1F5EE; --teal-dark: #085041;
-    --red: #E24B4A; --surface: #ffffff; --surface2: #f7f7f8;
-    --border: rgba(0,0,0,0.08); --text: #1a1a2e; --text2: #5a5a72; --text3: #9090a8;
-  }
-  body { font-family: 'DM Sans', system-ui, sans-serif; background: linear-gradient(135deg, #f0effe 0%, #e8f4f0 50%, #fdf6e8 100%); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 1rem; }
-  .container { width: 100%; max-width: 480px; background: var(--surface); border-radius: 28px; box-shadow: 0 8px 40px rgba(83,74,183,0.15), 0 0 0 1px rgba(83,74,183,0.08); display: flex; flex-direction: column; height: 94vh; max-height: 820px; overflow: hidden; animation: slideUp 0.4s cubic-bezier(0.16,1,0.3,1) both; }
-  @keyframes slideUp { from{opacity:0;transform:translateY(24px)} to{opacity:1;transform:translateY(0)} }
-  .header { background: linear-gradient(135deg, var(--brand) 0%, var(--brand-dark) 100%); padding: 1.1rem 1.25rem; display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
-  .hav { width: 42px; height: 42px; border-radius: 50%; background: rgba(255,255,255,0.15); border: 1.5px solid rgba(255,255,255,0.25); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-  .hav svg { width: 20px; height: 20px; }
-  .hinfo { flex: 1; }
-  .hname { font-size: 15px; font-weight: 600; color: #EEEDFE; }
-  .hstatus { font-size: 12px; color: rgba(238,237,254,0.7); display: flex; align-items: center; gap: 5px; margin-top: 1px; }
-  .sdot { width: 6px; height: 6px; border-radius: 50%; background: #5DCAA5; animation: pulse 2s infinite; }
-  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.5} }
-  .voice-toggle { display: flex; align-items: center; gap: 6px; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2); border-radius: 20px; padding: 5px 10px; cursor: pointer; }
-  .voice-toggle span { font-size: 11px; color: #CECBF6; font-weight: 500; }
-  .vt-dot { width: 7px; height: 7px; border-radius: 50%; background: #5DCAA5; flex-shrink: 0; }
-  .vt-dot.off { background: var(--text3); }
-  .messages { flex: 1; overflow-y: auto; padding: 1.25rem; display: flex; flex-direction: column; gap: 14px; scroll-behavior: smooth; }
-  .messages::-webkit-scrollbar { width: 3px; }
-  .messages::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
-  .msg { display: flex; gap: 8px; align-items: flex-end; animation: msgIn 0.3s cubic-bezier(0.16,1,0.3,1) both; }
-  @keyframes msgIn { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
-  .msg.user { flex-direction: row-reverse; }
-  .mav { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 600; flex-shrink: 0; margin-bottom: 2px; }
-  .mav.bot { background: var(--brand-light); color: var(--brand); }
-  .mav.user { background: var(--surface2); color: var(--text2); }
-  .bubble { max-width: 80%; padding: 10px 14px; font-size: 13.5px; line-height: 1.65; word-break: break-word; }
-  .bubble.bot { background: var(--surface2); color: var(--text); border-radius: 4px 18px 18px 18px; border: 1px solid var(--border); }
-  .bubble.user { background: var(--brand); color: #EEEDFE; border-radius: 18px 4px 18px 18px; }
-  .bubble.error { background: #FCEBEB; color: #791F1F; border-color: #F7C1C1; }
-  .bot-msg-wrap { display: flex; flex-direction: column; gap: 4px; max-width: 80%; }
-  .speak-btn { align-self: flex-start; display: flex; align-items: center; gap: 5px; padding: 3px 10px; border-radius: 12px; background: var(--surface2); border: 1px solid var(--border); font-size: 11px; color: var(--text2); cursor: pointer; transition: all 0.15s; font-family: 'DM Sans', sans-serif; }
-  .speak-btn:hover { background: var(--brand-light); color: var(--brand); }
-  .speak-btn.speaking { background: var(--teal-light); color: var(--teal-dark); }
-  .speak-btn svg { width: 11px; height: 11px; }
-  .typing-bubble { display: flex; gap: 4px; align-items: center; padding: 12px 16px; background: var(--surface2); border-radius: 4px 18px 18px 18px; border: 1px solid var(--border); }
-  .tdot { width: 6px; height: 6px; border-radius: 50%; background: var(--text3); animation: tb 1.2s infinite; }
-  .tdot:nth-child(2){animation-delay:0.2s} .tdot:nth-child(3){animation-delay:0.4s}
-  @keyframes tb { 0%,60%,100%{transform:translateY(0)} 30%{transform:translateY(-5px)} }
-  .chips-wrap { padding: 0.5rem 1.25rem 0.6rem; flex-shrink: 0; border-top: 1px solid var(--border); }
-  .chips-label { font-size: 10px; font-weight: 600; letter-spacing: 0.08em; color: var(--text3); text-transform: uppercase; margin-bottom: 6px; }
-  .chips { display: flex; flex-wrap: wrap; gap: 5px; }
-  .chip { font-size: 11.5px; padding: 4px 10px; border-radius: 20px; border: 1px solid var(--border); background: var(--surface2); color: var(--text2); cursor: pointer; transition: all 0.15s; font-family: 'DM Sans', sans-serif; white-space: nowrap; }
-  .chip:hover { background: var(--brand-light); color: var(--brand); }
-  .input-area { padding: 0.6rem 1.25rem 1rem; flex-shrink: 0; }
-  .voice-status { display: none; align-items: center; justify-content: center; gap: 8px; padding: 8px; border-radius: 10px; margin-bottom: 6px; font-size: 12px; }
-  .voice-status.listening { display: flex; background: #FCEBEB; color: #791F1F; }
-  .voice-status.speaking { display: flex; background: var(--teal-light); color: var(--teal-dark); }
-  .wave { display: flex; gap: 3px; align-items: center; }
-  .wave-bar { width: 3px; border-radius: 2px; animation: wave 0.8s infinite; }
-  .wave-bar:nth-child(1){height:8px;animation-delay:0s} .wave-bar:nth-child(2){height:14px;animation-delay:0.1s} .wave-bar:nth-child(3){height:10px;animation-delay:0.2s} .wave-bar:nth-child(4){height:16px;animation-delay:0.15s} .wave-bar:nth-child(5){height:8px;animation-delay:0.05s}
-  .voice-status.listening .wave-bar { background: var(--red); }
-  .voice-status.speaking .wave-bar { background: var(--teal); }
-  @keyframes wave { 0%,100%{transform:scaleY(0.5)} 50%{transform:scaleY(1)} }
-  .input-row { display: flex; gap: 8px; align-items: flex-end; background: var(--surface2); border-radius: 16px; border: 1.5px solid var(--border); padding: 8px 8px 8px 14px; transition: border-color 0.15s; }
-  .input-row:focus-within { border-color: var(--brand); background: var(--surface); }
-  textarea { flex: 1; border: none; background: transparent; font-family: 'DM Sans', sans-serif; font-size: 13.5px; color: var(--text); resize: none; outline: none; line-height: 1.5; max-height: 80px; min-height: 22px; padding: 0; }
-  textarea::placeholder { color: var(--text3); }
-  .btn-group { display: flex; gap: 6px; align-items: center; }
-  .mic-btn { width: 36px; height: 36px; border-radius: 10px; background: var(--surface); border: 1.5px solid var(--border); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.15s; flex-shrink: 0; }
-  .mic-btn:hover { border-color: var(--brand); background: var(--brand-light); }
-  .mic-btn.listening { background: var(--red); border-color: var(--red); animation: micPulse 1s infinite; }
-  @keyframes micPulse { 0%,100%{box-shadow:0 0 0 0 rgba(226,75,74,0.4)} 50%{box-shadow:0 0 0 8px rgba(226,75,74,0)} }
-  .mic-btn svg { width: 16px; height: 16px; }
-  .mic-btn.listening svg { stroke: white; }
-  .send-btn { width: 36px; height: 36px; border-radius: 10px; background: var(--brand); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.15s; flex-shrink: 0; }
-  .send-btn:hover { background: var(--brand-dark); transform: scale(1.05); }
-  .send-btn:disabled { background: var(--surface2); cursor: not-allowed; transform: none; }
-  .send-btn svg { width: 15px; height: 15px; }
-  .input-footer { font-size: 11px; color: var(--text3); text-align: center; margin-top: 5px; }
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap');
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --brand:#534AB7;--brand-dark:#3C3489;--brand-light:#EEEDFE;
+  --teal:#1D9E75;--teal-light:#E1F5EE;--teal-dark:#085041;
+  --text:#111;--text2:#444;--text3:#888;
+  --border:#e5e5e5;--surface:#fff;--surface2:#f8f8f8;
+}
+html{scroll-behavior:smooth}
+body{font-family:'Space Grotesk',sans-serif;background:#fff;color:var(--text);line-height:1.6}
+nav{display:flex;align-items:center;justify-content:space-between;padding:16px 24px;border-bottom:2px solid var(--text);position:sticky;top:0;background:#fff;z-index:100}
+.nav-logo{font-family:'Space Mono',monospace;font-weight:700;font-size:13px;color:var(--text)}
+.nav-logo span{color:var(--brand)}
+.nav-cta{background:var(--text);color:#fff;border:none;padding:8px 16px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;font-family:'Space Grotesk',sans-serif;text-decoration:none}
+.hero{background:#111;padding:52px 24px 0;text-align:center}
+.hero-tag{display:inline-block;background:var(--brand);color:#EEEDFE;font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;padding:5px 12px;border-radius:4px;margin-bottom:20px}
+.hero h1{font-size:clamp(32px,7vw,52px);font-weight:700;line-height:1.05;color:#fff;margin-bottom:10px;letter-spacing:-1px}
+.hero h1 .accent{color:#5DCAA5}
+.hero-tagline{font-size:18px;font-weight:600;color:#5DCAA5;margin-bottom:8px;letter-spacing:-0.3px}
+.hero-sub{font-size:15px;color:#888;line-height:1.7;max-width:480px;margin:0 auto 32px}
+.hero-price-strip{background:#5DCAA5;padding:14px 24px;display:flex;align-items:center;justify-content:space-between;max-width:480px;margin:0 auto;border-radius:10px 10px 0 0}
+.hero-price-left .t1{font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#085041}
+.hero-price-left .t2{font-family:'Space Mono',monospace;font-size:28px;font-weight:700;color:#04342C;line-height:1}
+.hero-price-left .t3{font-size:11px;color:#085041}
+.hero-price-btn{background:#04342C;color:#5DCAA5;border:none;padding:12px 20px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Space Grotesk',sans-serif;white-space:nowrap;text-decoration:none;display:inline-block}
+.ticker{background:#f5f5f5;border-top:2px solid var(--text);border-bottom:2px solid var(--text);padding:10px 24px;display:flex;gap:24px;overflow:hidden;flex-wrap:wrap}
+.tick{display:flex;align-items:center;gap:6px;font-size:11px;color:#555;white-space:nowrap;font-weight:500}
+.tdot{width:6px;height:6px;border-radius:50%;background:#5DCAA5;flex-shrink:0}
+.section{padding:48px 24px;max-width:640px;margin:0 auto}
+.section-num{font-family:'Space Mono',monospace;font-size:10px;font-weight:700;color:var(--brand);display:block;margin-bottom:4px}
+.section-title{font-size:22px;font-weight:700;color:var(--text);margin-bottom:20px;letter-spacing:-0.3px}
+.steps-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.step-card{border:2px solid var(--border);border-radius:10px;padding:14px}
+.step-card.hi{border-color:var(--brand);background:var(--brand-light)}
+.step-num{font-family:'Space Mono',monospace;font-size:10px;color:#aaa;margin-bottom:6px}
+.step-card.hi .step-num{color:var(--brand)}
+.step-t{font-size:13px;font-weight:700;color:var(--text);margin-bottom:3px}
+.step-card.hi .step-t{color:#3C3489}
+.step-s{font-size:11px;color:#888;line-height:1.5}
+.schedule{border:2px solid #5DCAA5;border-radius:10px;padding:16px}
+.sch-label{font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#0F6E56;margin-bottom:12px}
+.sch-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid #d8f5ed}
+.sch-row:last-child{border-bottom:none}
+.sch-time{font-family:'Space Mono',monospace;font-size:16px;font-weight:700;color:#085041}
+.sch-type{font-size:12px;color:#1D9E75;font-weight:500}
+.sch-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px}
+.badge-all{background:#E1F5EE;color:#085041}
+.badge-l2{background:#EEEDFE;color:#3C3489}
+.sch-dot{width:7px;height:7px;border-radius:50%;background:#5DCAA5;animation:blink 2s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.3}}
+.twofa-box{background:#FAEEDA;border:1px solid #FAC775;border-radius:10px;padding:16px;margin-top:16px}
+.twofa-title{font-size:13px;font-weight:700;color:#633806;margin-bottom:8px}
+.twofa-text{font-size:12px;color:#854F0B;line-height:1.7}
+.pricing-box{background:#111;border-radius:10px;padding:18px}
+.pricing-label{font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#555;margin-bottom:12px}
+.pricing-row{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #222;font-size:12px}
+.pricing-row:last-child{border-bottom:none;padding-top:10px;margin-top:4px}
+.pricing-row .l{color:#888}
+.pricing-row .r{color:#fff;font-weight:600;font-family:'Space Mono',monospace}
+.pricing-row.tot .l{color:#fff;font-weight:700;font-size:14px}
+.pricing-row.tot .r{color:#5DCAA5;font-size:22px}
+.sec-list{margin-bottom:0}
+.sec-row{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)}
+.sec-row:last-child{border-bottom:none}
+.sec-badge{font-family:'Space Mono',monospace;font-size:9px;font-weight:700;padding:3px 7px;border-radius:4px;flex-shrink:0;margin-top:1px}
+.aws{background:#FAEEDA;color:#633806}
+.prv{background:#f0f0f0;color:#444}
+.tls{background:#E1F5EE;color:#085041}
+.del{background:#EEEDFE;color:#3C3489}
+.one{background:#f0f0f0;color:#444}
+.sec-text{font-size:12px;color:#555;line-height:1.5}
+.sec-text strong{color:var(--text);font-weight:600}
+.final-cta{background:var(--brand);padding:48px 24px;text-align:center}
+.final-cta h2{font-size:24px;font-weight:700;color:#fff;margin-bottom:8px}
+.final-cta p{font-size:13px;color:#AFA9EC;margin-bottom:24px;line-height:1.6}
+.final-btn{display:inline-block;background:#fff;color:var(--brand);border:none;padding:16px 32px;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;font-family:'Space Grotesk',sans-serif;text-decoration:none;width:100%;max-width:400px}
+.final-sub{font-size:11px;color:#AFA9EC;margin-top:10px}
+footer{background:#111;padding:24px;text-align:center}
+footer p{font-size:12px;color:#555}
+footer a{color:#888;text-decoration:none}
+.chat-bubble{position:fixed;bottom:24px;right:24px;z-index:1000}
+.chat-btn{width:56px;height:56px;border-radius:50%;background:var(--brand);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(83,74,183,0.4)}
+.chat-btn svg{width:24px;height:24px}
+.chat-badge{position:absolute;top:-4px;right:-4px;width:18px;height:18px;border-radius:50%;background:#5DCAA5;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#04342C}
+.chat-frame{position:fixed;bottom:90px;right:24px;width:360px;height:500px;border-radius:20px;overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,0.2);display:none;z-index:999}
+.chat-frame.open{display:block}
+@media(max-width:400px){.chat-frame{width:calc(100vw - 32px);right:16px}}
+.divider{border:none;border-top:2px solid var(--border);margin:0}
+.field-label{font-size:12px;font-weight:600;color:#111;display:block;margin-bottom:4px}
+.field-hint{font-size:11px;color:#888;margin-bottom:6px}
+.field-input{width:100%;border:1px solid #e5e5e5;border-radius:8px;padding:8px 10px;font-size:13px;font-family:'Space Grotesk',sans-serif;outline:none}
+.field-input:focus{border-color:var(--brand)}
+.field-select{width:100%;border:1px solid #e5e5e5;border-radius:8px;padding:8px 10px;font-size:12px;font-family:'Space Grotesk',sans-serif;background:#fff;outline:none}
+.phone-row{display:grid;grid-template-columns:130px 1fr;gap:8px}
+.form-section{font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#aaa;margin-bottom:10px;border-top:1px solid #f0f0f0;padding-top:16px}
+.form-section:first-of-type{border-top:none;padding-top:0}
+.submit-btn{width:100%;padding:15px;background:#534AB7;color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Space Grotesk',sans-serif;margin-top:4px}
+.submit-btn:disabled{background:#aaa;cursor:not-allowed}
+.submit-btn:hover:not(:disabled){background:#3C3489}
+.error-msg{color:#E24B4A;font-size:12px;margin-top:4px;display:none}
+.success-box{background:#E1F5EE;border:1px solid #5DCAA5;border-radius:10px;padding:16px;text-align:center;display:none}
 </style>
 </head>
 <body>
-<div class="container">
-  <div class="header">
-    <div class="hav">
-      <svg viewBox="0 0 24 24" fill="none" stroke="rgba(238,237,254,0.9)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
-    </div>
-    <div class="hinfo">
-      <div class="hname">DSJ Autotrader Support</div>
-      <div class="hstatus"><span class="sdot"></span>AI-powered · Voice enabled</div>
-    </div>
-    <div class="voice-toggle" onclick="toggleAutoSpeak()" id="auto-speak-toggle">
-      <div class="vt-dot" id="vt-dot"></div>
-      <span id="vt-label">Voice on</span>
-    </div>
-  </div>
-  <div class="messages" id="messages">
-    <div class="msg">
-      <div class="mav bot">AT</div>
-      <div class="bot-msg-wrap">
-        <div class="bubble bot">Hey! I am the DSJ Autotrader assistant. Type your question or tap the mic to speak and I will answer instantly. What would you like to know?</div>
-        <button class="speak-btn" onclick="speakText(this,'Hey! I am the DSJ Autotrader assistant. Type your question or tap the mic to speak and I will answer instantly. What would you like to know?')">
-          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M8 1v14M4 4v8M12 4v8M1 7v2M15 7v2"/></svg>Play reply
-        </button>
+
+<nav>
+  <div class="nav-logo">DSJ_<span>AUTOTRADER</span></div>
+  <a href="#signup-form" class="nav-cta">Get started</a>
+</nav>
+
+<div class="hero">
+  <div class="hero-tag">BG-015 Wealth Sharing Investment Group · Automated Trading</div>
+  <h1>Never let a busy day<br><span class="accent">cost you a trade.</span></h1>
+  <p class="hero-tagline">1pm and 7pm. Every day. With or without you.</p>
+  <p class="hero-sub">Consistent trades. Consistent growth. Zero effort. Your DSJ signals posted automatically — no matter where you are or what you're doing.</p>
+  <div style="max-width:480px;margin:0 auto">
+    <div class="hero-price-strip">
+      <div class="hero-price-left">
+        <div class="t1">Get started today</div>
+        <div class="t2">$29<span style="font-size:14px">/mo</span></div>
+        <div class="t3">No setup fee · Cancel anytime</div>
       </div>
+      <a href="#signup-form" class="hero-price-btn">Start now →</a>
     </div>
-  </div>
-  <div class="chips-wrap" id="chips-wrap">
-    <div class="chips-label">Tap to ask</div>
-    <div class="chips">
-      <button class="chip" onclick="sendChip(this.textContent)">What is DSJ Autotrader?</button>
-      <button class="chip" onclick="sendChip(this.textContent)">How much does it cost?</button>
-      <button class="chip" onclick="sendChip(this.textContent)">Is my info safe?</button>
-      <button class="chip" onclick="sendChip(this.textContent)">How does the bot work?</button>
-      <button class="chip" onclick="sendChip(this.textContent)">How do I sign up?</button>
-      <button class="chip" onclick="sendChip(this.textContent)">What about 2FA?</button>
-      <button class="chip" onclick="sendChip(this.textContent)">Can I cancel anytime?</button>
-      <button class="chip" onclick="sendChip(this.textContent)">What is the referral program?</button>
-    </div>
-  </div>
-  <div class="input-area">
-    <div class="voice-status" id="voice-status">
-      <div class="wave"><div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div></div>
-      <span id="voice-status-text">Listening...</span>
-    </div>
-    <div class="input-row">
-      <textarea id="user-input" placeholder="Type or tap mic to speak..." rows="1" onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
-      <div class="btn-group">
-        <button class="mic-btn" id="mic-btn" onclick="toggleMic()">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="11" rx="3"/><path d="M5 10a7 7 0 0014 0M12 19v3M8 22h8"/></svg>
-        </button>
-        <button class="send-btn" id="send-btn" onclick="sendMessage()">
-          <svg viewBox="0 0 16 16" fill="none" stroke="#EEEDFE" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 8h12M8 2l6 6-6 6"/></svg>
-        </button>
-      </div>
-    </div>
-    <div class="input-footer">DSJ Autotrader · Powered by Claude AI</div>
   </div>
 </div>
+
+<div class="ticker">
+  <div class="tick"><span class="tdot"></span>Bot live in 1 hour</div>
+  <div class="tick"><span class="tdot"></span>2 trades per day</div>
+  <div class="tick"><span class="tdot"></span>Level 2 — 3 trades per day</div>
+  <div class="tick"><span class="tdot"></span>Cancel anytime</div>
+  <div class="tick"><span class="tdot"></span>Secure private server</div>
+  <div class="tick"><span class="tdot"></span>Never miss a signal</div>
+</div>
+
+<div class="section">
+  <span class="section-num">01 —</span>
+  <div class="section-title">How it works</div>
+  <div class="steps-grid">
+    <div class="step-card hi">
+      <div class="step-num">STEP 01</div>
+      <div class="step-t">Fill the signup form</div>
+      <div class="step-s">Enter your contact info and account credentials securely. Takes about 5 minutes.</div>
+    </div>
+    <div class="step-card">
+      <div class="step-num">STEP 02</div>
+      <div class="step-t">Pay $29 to activate</div>
+      <div class="step-s">First month payment. Secure checkout via Stripe. No setup fee.</div>
+    </div>
+    <div class="step-card">
+      <div class="step-num">STEP 03</div>
+      <div class="step-t">Bot goes live</div>
+      <div class="step-s">Your secure private server is configured and running within 1 hour.</div>
+    </div>
+    <div class="step-card">
+      <div class="step-num">EVERY DAY</div>
+      <div class="step-t">You do nothing</div>
+      <div class="step-s">Sleep, work, travel — your bot never misses a trade signal.</div>
+    </div>
+  </div>
+</div>
+
+<hr class="divider">
+
+<div class="section">
+  <span class="section-num">02 —</span>
+  <div class="section-title">Daily trade schedule</div>
+  <div class="schedule">
+    <div class="sch-label">Live signal execution times · All times EST</div>
+    <div class="sch-row">
+      <div class="sch-time">1:00 PM</div>
+      <div class="sch-type">Basic Trading Signal</div>
+      <div class="sch-badge badge-all">All members</div>
+      <div class="sch-dot"></div>
+    </div>
+    <div class="sch-row">
+      <div class="sch-time">7:00 PM</div>
+      <div class="sch-type">Basic Trading Signal</div>
+      <div class="sch-badge badge-all">All members</div>
+      <div class="sch-dot"></div>
+    </div>
+    <div class="sch-row">
+      <div class="sch-time">8:00 PM</div>
+      <div class="sch-type">Permanent Dynamic Signal</div>
+      <div class="sch-badge badge-l2">Level 2+</div>
+      <div class="sch-dot"></div>
+    </div>
+  </div>
+  <div class="twofa-box">
+    <div class="twofa-title">⚠ Important: 2FA must be disabled on your DSJ account</div>
+    <div class="twofa-text">Your bot logs in automatically — it cannot receive SMS verification codes. You must disable two-factor authentication in your DSJ account Security Settings before your bot can run. This is completely safe because your credentials are stored using bank-grade AWS Secrets Manager encryption.</div>
+  </div>
+</div>
+
+<hr class="divider">
+
+<div class="section">
+  <span class="section-num">03 —</span>
+  <div class="section-title">Simple pricing</div>
+  <div class="pricing-box">
+    <div class="pricing-label">What you pay</div>
+    <div class="pricing-row"><span class="l">Monthly subscription</span><span class="r">$29.00</span></div>
+    <div class="pricing-row"><span class="l">Setup fee</span><span class="r" style="color:#5DCAA5">$0.00</span></div>
+    <div class="pricing-row tot"><span class="l">Due today</span><span class="r">$29</span></div>
+  </div>
+  <div style="font-size:11px;color:#888;text-align:center;margin-top:8px">Then $29 automatically every month · Cancel anytime · No contracts</div>
+</div>
+
+<hr class="divider">
+
+<div class="section">
+  <span class="section-num">04 —</span>
+  <div class="section-title">Bank-grade security</div>
+  <div class="sec-list">
+    <div class="sec-row"><span class="sec-badge aws">AWS</span><span class="sec-text"><strong>Secrets Manager encryption</strong> — same technology used by banks and Fortune 500 companies. Your password is encrypted the moment it's received.</span></div>
+    <div class="sec-row"><span class="sec-badge prv">PRIVATE</span><span class="sec-text"><strong>Your own secure private container</strong> — dedicated to your account only, never shared with any other member.</span></div>
+    <div class="sec-row"><span class="sec-badge tls">TLS</span><span class="sec-text"><strong>All data encrypted in transit</strong> — no plain text transmission anywhere in the system.</span></div>
+    <div class="sec-row"><span class="sec-badge one">ONE TASK</span><span class="sec-text"><strong>Bot does one thing only</strong> — log in, read the signal, post the trade. Nothing else.</span></div>
+    <div class="sec-row"><span class="sec-badge del">DELETED</span><span class="sec-text"><strong>All credentials permanently deleted within minutes of cancellation</strong> — completely gone the moment you cancel.</span></div>
+  </div>
+</div>
+
+<hr class="divider">
+
+<div class="final-cta">
+  <h2>Stop missing trades.</h2>
+  <p>The DSJ system only works if you show up every day.<br>This bot shows up for you — at 1pm and 7pm, every single day.</p>
+  <a href="#signup-form" class="final-btn">Get started — $29/month</a>
+  <div class="final-sub">No setup fee · Secure private server · Bot live in 1 hour · Cancel anytime</div>
+</div>
+
+<!-- SIGNUP FORM -->
+<div id="signup-form" style="background:#f8f8f8;padding:48px 24px">
+  <div style="max-width:520px;margin:0 auto">
+
+    <div style="background:#534AB7;border-radius:14px 14px 0 0;padding:20px 24px">
+      <div style="font-family:'Space Mono',monospace;font-weight:700;font-size:14px;color:#EEEDFE;margin-bottom:4px">DSJ_AUTOTRADER — Member Setup</div>
+      <div style="font-size:12px;color:#AFA9EC">Bot live within 1 hour. All credentials are encrypted before leaving your device.</div>
+    </div>
+
+    <div style="background:#3C3489;padding:10px 24px;display:flex;align-items:center;gap:8px">
+      <div style="width:7px;height:7px;border-radius:50%;background:#5DCAA5;flex-shrink:0"></div>
+      <div style="font-size:12px;color:#CECBF6">Secure signup · All fields are encrypted end-to-end</div>
+    </div>
+
+    <div style="background:#fff;border:0.5px solid #e5e5e5;border-top:none;border-radius:0 0 14px 14px;padding:24px">
+
+      <div style="display:inline-flex;align-items:center;gap:6px;background:#E1F5EE;border-radius:20px;padding:5px 14px;margin-bottom:20px">
+        <div style="width:7px;height:7px;border-radius:50%;background:#1D9E75"></div>
+        <span style="font-size:12px;font-weight:600;color:#085041">Bot activation within 1 hour of payment confirmation</span>
+      </div>
+
+      <!-- PERSONAL INFO -->
+      <div class="form-section" style="border-top:none;padding-top:0">Personal info</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
+        <div>
+          <label class="field-label">First name <span style="color:#E24B4A">*</span></label>
+          <input id="f-firstname" type="text" placeholder="James" class="field-input">
+        </div>
+        <div>
+          <label class="field-label">Last name <span style="color:#E24B4A">*</span></label>
+          <input id="f-lastname" type="text" placeholder="Wilson" class="field-input">
+        </div>
+      </div>
+      <div style="margin-bottom:12px">
+        <label class="field-label">Email address <span style="color:#E24B4A">*</span></label>
+        <input id="f-email" type="email" placeholder="you@email.com" class="field-input">
+      </div>
+      <div style="margin-bottom:20px">
+        <label class="field-label">WhatsApp / phone <span style="color:#E24B4A">*</span></label>
+        <div class="phone-row">
+          <select id="f-whatsapp-cc" class="field-select">
+            <option value="+1">+1 US/CA</option><option value="+44">+44 UK</option><option value="+234">+234 Nigeria</option><option value="+27">+27 S.Africa</option><option value="+233">+233 Ghana</option><option value="+254">+254 Kenya</option><option value="+263">+263 Zimbabwe</option><option value="+61">+61 Australia</option><option value="+91">+91 India</option><option value="+1868">+1 868 Trinidad</option><option value="+1876">+1 876 Jamaica</option>
+          </select>
+          <input id="f-whatsapp" type="tel" placeholder="Phone number" class="field-input">
+        </div>
+      </div>
+
+      <!-- ACCOUNT NICKNAME -->
+      <div class="form-section">Account setup</div>
+      <div style="margin-bottom:20px">
+        <label class="field-label">Account nickname <span style="color:#E24B4A">*</span></label>
+        <div class="field-hint">Give your bot a name so you can identify it (e.g. "My Main Account")</div>
+        <input id="f-nickname" type="text" placeholder="e.g. My Main Account" class="field-input">
+      </div>
+
+      <!-- DSJ CREDENTIALS -->
+      <div class="form-section">DSJ Exchange account</div>
+      <div style="background:#EEEDFE;border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:12px;color:#3C3489;line-height:1.6">Your DSJ credentials are encrypted using AWS Secrets Manager — the same bank-grade technology used for all credentials. Never stored in any spreadsheet or visible to any person, including the service owner.</div>
+      <div style="background:#FAEEDA;border:1px solid #FAC775;border-radius:8px;padding:12px 14px;margin-bottom:12px">
+        <div style="font-size:12px;font-weight:700;color:#633806;margin-bottom:4px">⚠ Action required before submitting</div>
+        <div style="font-size:11px;color:#854F0B;line-height:1.6">You must <strong>disable two-factor authentication (2FA)</strong> on your DSJ account before your bot can run. Go to DSJ account → Security Settings → turn off 2FA. Takes less than 2 minutes.</div>
+      </div>
+      <div style="margin-bottom:12px">
+        <label class="field-label">DSJ mobile number <span style="color:#E24B4A">*</span></label>
+        <div class="phone-row">
+          <select id="f-dsj-cc" class="field-select">
+            <option value="+1">+1 US/CA</option><option value="+44">+44 UK</option><option value="+234">+234 Nigeria</option><option value="+27">+27 S.Africa</option><option value="+233">+233 Ghana</option><option value="+254">+254 Kenya</option><option value="+263">+263 Zimbabwe</option><option value="+61">+61 Australia</option><option value="+91">+91 India</option><option value="+1868">+1 868 Trinidad</option><option value="+1876">+1 876 Jamaica</option>
+          </select>
+          <input id="f-dsj-phone" type="tel" placeholder="Mobile number" class="field-input">
+        </div>
+      </div>
+      <div style="margin-bottom:20px">
+        <label class="field-label">DSJ password <span style="color:#E24B4A">*</span></label>
+        <div class="field-hint">Encrypted in your browser before submission — never transmitted in plain text</div>
+        <input id="f-dsj-password" type="password" placeholder="••••••••••••" class="field-input">
+      </div>
+
+
+
+      <!-- LEVEL 2 -->
+      <div style="border-top:1px solid #f0f0f0;padding-top:16px;margin-bottom:20px">
+        <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer">
+          <input type="checkbox" id="level2-check" style="margin-top:2px;flex-shrink:0" onchange="toggleLevel2(this)">
+          <div>
+            <div style="font-size:13px;font-weight:600;color:#111">I am a Level 2 member — add the 8:00 PM Permanent Dynamic Trading Signal</div>
+            <div style="font-size:11px;color:#888;margin-top:2px">Available to Level 2 members and above only. No extra charge.</div>
+          </div>
+        </label>
+        <div id="level2-confirm" style="display:none;background:#EEEDFE;border-radius:8px;padding:10px 14px;margin-top:10px;font-size:12px;color:#3C3489">
+          Your bot will execute all three daily signals: 1:00 PM, 7:00 PM, and 8:00 PM EST.
+        </div>
+      </div>
+
+      <!-- PRICING SUMMARY -->
+      <div style="background:#f8f8f8;border-radius:10px;padding:16px;margin-bottom:16px;border:1px solid #e5e5e5">
+        <div style="font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#aaa;margin-bottom:10px">Payment summary</div>
+        <div style="display:flex;justify-content:space-between;font-size:12px;padding:4px 0;border-bottom:1px solid #e5e5e5"><span style="color:#888">Monthly subscription</span><span style="font-weight:600">$29.00</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:12px;padding:4px 0;border-bottom:1px solid #e5e5e5"><span style="color:#888">Setup fee</span><span style="font-weight:600;color:#1D9E75">$0.00</span></div>
+        <div style="display:flex;justify-content:space-between;padding:8px 0 0;align-items:center"><span style="font-size:14px;font-weight:700;color:#111">Due today</span><span style="font-size:22px;font-weight:700;color:#534AB7;font-family:'Space Mono',monospace">$29.00</span></div>
+        <div style="font-size:11px;color:#888;margin-top:6px;text-align:right">then $29.00/month · cancel anytime</div>
+      </div>
+
+      <!-- CONSENT -->
+      <div style="background:#f8f8f8;border:0.5px solid #e5e5e5;border-radius:8px;padding:14px;margin-bottom:16px">
+        <div style="font-size:12px;color:#888;margin-bottom:8px">By submitting you confirm that:</div>
+        <label style="display:flex;gap:8px;align-items:flex-start;font-size:12px;color:#111;cursor:pointer;margin-bottom:6px"><input type="checkbox" id="consent1" style="margin-top:2px;flex-shrink:0">I am an active BG-015 Wealth Sharing Investment Group member</label>
+        <label style="display:flex;gap:8px;align-items:flex-start;font-size:12px;color:#111;cursor:pointer;margin-bottom:6px"><input type="checkbox" id="consent2" style="margin-top:2px;flex-shrink:0">I have disabled 2FA on my DSJ account</label>
+        <label style="display:flex;gap:8px;align-items:flex-start;font-size:12px;color:#111;cursor:pointer"><input type="checkbox" id="consent3" style="margin-top:2px;flex-shrink:0">I authorize DSJ Autotrader to execute daily trades on my behalf</label>
+      </div>
+
+      <!-- ERROR + SUCCESS -->
+      <div id="form-error" class="error-msg"></div>
+      <div id="form-success" class="success-box">
+        <div style="font-size:16px;font-weight:700;color:#085041;margin-bottom:6px">Signup received!</div>
+        <div style="font-size:13px;color:#1D9E75">Redirecting you to payment now...</div>
+      </div>
+
+      <button class="submit-btn" id="submit-btn" onclick="submitForm()">Submit and proceed to payment — $29.00</button>
+      <div style="font-size:11px;color:#aaa;text-align:center;margin-top:8px">Secure payment via Stripe · Bot live within 1 hour of payment confirmation</div>
+
+      <div style="text-align:center;margin-top:16px;padding-top:16px;border-top:1px solid #f0f0f0">
+        <div style="font-size:12px;color:#888">Questions? Contact support</div>
+        <a href="https://wa.me/12054753209" style="font-size:13px;font-weight:600;color:#1D9E75;text-decoration:none">WhatsApp: +1 (205) 475-3209</a>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<footer>
+  <p style="margin-bottom:6px">DSJ Autotrader · For BG-015 Wealth Sharing Investment Group members</p>
+  <p>Support: <a href="https://wa.me/12054753209">WhatsApp +1 (205) 475-3209</a></p>
+  <p style="margin-top:8px;font-size:11px;color:#333">For best experience including voice replies on the support chat, open this page in Safari on iPhone or Chrome on Android.</p>
+</footer>
+
+<div class="chat-bubble">
+  <div class="chat-frame" id="chat-frame">
+    <button style="position:absolute;top:10px;right:14px;background:rgba(255,255,255,0.2);border:none;color:#fff;font-size:16px;cursor:pointer;border-radius:50%;width:28px;height:28px;display:flex;align-items:center;justify-content:center;z-index:10" onclick="toggleChat()">✕</button>
+    <iframe src="https://aiassistantclone-tech.github.io/dsj-autotrader-bot" style="width:100%;height:100%;border:none"></iframe>
+  </div>
+  <button class="chat-btn" onclick="toggleChat()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+    <div class="chat-badge">?</div>
+  </button>
+</div>
+
 <script>
-const PROXY_URL = 'https://dsj-proxy.aiassistantclone.workers.dev';
-const SYSTEM_PROMPT = `You are the official support and sales assistant for DSJ Autotrader. Be warm, confident, conversational. Keep answers under 4 sentences when possible since replies may be spoken aloud.
+// ============================================================
+// CONFIGURATION — Update these values
+// ============================================================
+const SHEET_ID = '1vCMs7PzaJBkM_g3OSXbuD319h0TMDC94r8h0TRoYcbc';
+const STRIPE_LINK = 'https://buy.stripe.com/test_aFa00j2z4ekG51T78W6sw00';
 
-ABOUT: DSJ Autotrader is a bot running on a private AWS EC2 cloud server. It logs into Bonchat, reads the DSJ trade signals, then logs into the member DSJ exchange account and posts the trades automatically every day. The service is for active members of the BG-015 Wealth Sharing Investment Group who use Bonchat.
+// Encryption master key — CHANGE THIS to your own secret phrase
+// Keep this private — never share it or upload to GitHub
+const MASTER_KEY = 'DSJ-AutoTrader-2026-SecureKey-BG015';
 
-TRADING SCHEDULE — all times EST:
-- 1:00 PM EST — Basic Trading Signal (all members)
-- 7:00 PM EST — Basic Trading Signal (all members)
-- 8:00 PM EST — Permanent Dynamic Trading Signal (Level 2 members and above only)
-The bot monitors Bonchat continuously and executes each signal the moment it is detected.
+// Google Apps Script Web App URL — we'll add this after setup
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwmJzQMC7PFT0f7FJ42VmWOXZAgpUV7Ceas_dtjWSdtbVPV3UJpoUe9FMRHyKb7O4XowA/exec';
+// ============================================================
 
-LEVEL 2 THIRD SIGNAL: The 8:00 PM Permanent Dynamic Trading Signal is available to Level 2 members and above in the BG-015 Wealth Sharing Investment Group. If a member has reached Level 2 they can select this option on the signup form and their bot will be configured to execute all three daily signals at no extra cost — same $79 today and $29 per month.
+function getRef() {
+  const params = new URLSearchParams(window.location.search);
+  return params.get('ref') || '';
+}
 
-LOST TRADE RECOVERY: If the professor issues a makeup trade signal at a random time due to a lost trade, yes the bot will adapt and execute it automatically. The system monitors Bonchat continuously so any new signal from the professor is picked up and traded regardless of the time it is posted.
+function toggleChat() {
+  document.getElementById('chat-frame').classList.toggle('open');
+}
 
-TRADE CONFIRMATIONS: Members can opt-in to receive trade confirmation notifications. Ask about this during signup or contact support to enable it.
+function toggleLevel2(cb) {
+  document.getElementById('level2-confirm').style.display = cb.checked ? 'block' : 'none';
+}
 
-PRICING: Always explain as: $50 one-time setup fee plus $29 first month equals $79 due today. Then just $29 per month automatically after that. Less than $1 a day. The $50 setup fee covers: dedicated VPS server build, secure private container configuration, encrypted credential vault setup, and bot deployment.
+function encryptValue(value) {
+  return CryptoJS.AES.encrypt(value, MASTER_KEY).toString();
+}
 
-2FA: Members must disable two-factor authentication on their DSJ account before the bot can run. The bot cannot receive SMS verification codes. This is completely safe because credentials are stored in an encrypted vault on a secure private server. To disable 2FA go to DSJ account Security Settings and turn it off. Takes less than 2 minutes.
+function showError(msg) {
+  const el = document.getElementById('form-error');
+  el.textContent = msg;
+  el.style.display = 'block';
+  setTimeout(() => el.style.display = 'none', 5000);
+}
 
-SECURITY: Credentials collected via encrypted Jotform — never stored in a spreadsheet. AWS Secrets Manager bank-grade encryption — even the service owner cannot read passwords. Each member gets their own secure private container. Bot does ONE thing only: login, read signal, post trade. All credentials permanently deleted within MINUTES of cancellation — deletion begins the moment cancellation is confirmed. SSL encryption on all data in transit.
+function validateForm() {
+  const required = [
+    { id: 'f-firstname', label: 'First name' },
+    { id: 'f-lastname', label: 'Last name' },
+    { id: 'f-email', label: 'Email' },
+    { id: 'f-whatsapp', label: 'WhatsApp number' },
+    { id: 'f-nickname', label: 'Account nickname' },
+    { id: 'f-dsj-phone', label: 'DSJ phone number' },
+    { id: 'f-dsj-password', label: 'DSJ password' },
+  ];
+  for (const field of required) {
+    if (!document.getElementById(field.id).value.trim()) {
+      showError(`Please fill in: ${field.label}`);
+      document.getElementById(field.id).focus();
+      return false;
+    }
+  }
+  if (!document.getElementById('consent1').checked) { showError('Please confirm you are a BG-015 member'); return false; }
+  if (!document.getElementById('consent2').checked) { showError('Please confirm you have disabled 2FA on your DSJ account'); return false; }
+  if (!document.getElementById('consent3').checked) { showError('Please authorize DSJ Autotrader to execute trades on your behalf'); return false; }
+  return true;
+}
 
-ACCOUNT FUNDING: Yes, your DSJ exchange account must stay funded. This is a tool to help make sure your DSJ account stays daily compounding.
+async function submitForm() {
+  if (!validateForm()) return;
 
-CANCELLATION: Cancellation takes effect at the end of your current billing cycle. If you need it stopped immediately that can be done upon request — contact support.
+  const btn = document.getElementById('submit-btn');
+  btn.disabled = true;
+  btn.textContent = 'Encrypting and submitting...';
 
-MULTIPLE ACCOUNTS: Yes, multiple accounts are supported. Contact support to set up additional accounts.
+  try {
+    // Encrypt passwords in browser BEFORE sending
+    const dsjPasswordEncrypted = encryptValue(document.getElementById('f-dsj-password').value);
 
-PAYMENT: Stripe handles everything automatically. Card saved at signup. $29 auto-charged every 30 days. Renewal reminder 3 days before each charge. Failed payments automatically retried up to 4 times. Members manage billing via self-service Stripe portal.
+    // Build form data
+    const formData = {
+      timestamp: new Date().toISOString(),
+      firstName: document.getElementById('f-firstname').value.trim(),
+      lastName: document.getElementById('f-lastname').value.trim(),
+      email: document.getElementById('f-email').value.trim(),
+      whatsapp: "'" + document.getElementById('f-whatsapp-cc').value + document.getElementById('f-whatsapp').value.trim(),
+      nickname: document.getElementById('f-nickname').value.trim(),
+      dsjPhone: "'" + document.getElementById('f-dsj-cc').value + document.getElementById('f-dsj-phone').value.trim(),
+      dsjPassword: dsjPasswordEncrypted,
+      level2: document.getElementById('level2-check').checked ? 'Yes' : 'No',
+      referredBy: getRef(),
+      paymentStatus: 'Pending',
+      botStatus: 'Pending',
+      notes: ''
+    };
 
-SUPPORT: Members can get help via the chatbot, email, or WhatsApp. Contact details provided at signup confirmation.
+    // Send to Google Sheets via Apps Script
+    if (APPS_SCRIPT_URL !== 'YOUR_APPS_SCRIPT_URL_HERE') {
+      await fetch(APPS_SCRIPT_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData)
+      });
+    }
 
-BROWSER NOTE: For the best experience including voice replies, open this page in Safari on iPhone or Chrome on Android.
+    // Show success and redirect to Stripe
+    document.getElementById('form-success').style.display = 'block';
+    btn.style.display = 'none';
 
-REFERRAL: Leaders get a unique referral link. Earn $10 per confirmed signup plus $3 per month per active referral. Refer 5 or more members and your subscription is free.
+    // Redirect to Stripe after 2 seconds
+    setTimeout(() => {
+      window.location.href = STRIPE_LINK + '?prefilled_email=' + encodeURIComponent(formData.email);
+    }, 2000);
 
-MARKETING: Naturally weave in: The DSJ system only works if you show up every day — this bot shows up for you. At less than $1 a day it costs less than a coffee. Bot live within 1 hour of payment and form confirmation. Even makeup trades from the professor get caught and executed automatically.`;
-let history=[], loading=false, autoSpeak=localStorage.getItem('dsj_auto_speak')==='true', recognition=null, listening=false, currentUtt=null;
-function init(){updateToggle();}
-function updateToggle(){document.getElementById('vt-dot').className=autoSpeak?'vt-dot':'vt-dot off';document.getElementById('vt-label').textContent=autoSpeak?'Voice on':'Voice off';}
-function toggleAutoSpeak(){autoSpeak=!autoSpeak;localStorage.setItem('dsj_auto_speak',autoSpeak);updateToggle();if(!autoSpeak&&currentUtt){speechSynthesis.cancel();clearBtns();}}
-function clearBtns(){document.querySelectorAll('.speak-btn.speaking').forEach(b=>{b.classList.remove('speaking');b.innerHTML=pIcon()+'Play reply';});}
-function pIcon(){return'<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M8 1v14M4 4v8M12 4v8M1 7v2M15 7v2"/></svg>';}
-function sIcon(){return'<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="4" y="4" width="8" height="8" rx="1" fill="currentColor"/></svg>';}
-function speakText(btn,text){if(!('speechSynthesis' in window))return;if(btn.classList.contains('speaking')){speechSynthesis.cancel();btn.classList.remove('speaking');btn.innerHTML=pIcon()+'Play reply';setVS(null);return;}speechSynthesis.cancel();clearBtns();const u=new SpeechSynthesisUtterance(text);u.rate=0.95;const vs=speechSynthesis.getVoices();const pv=vs.find(v=>v.name.includes('Samantha')||v.name.includes('Karen')||v.name.includes('Google US English')||(v.lang==='en-US'&&v.localService));if(pv)u.voice=pv;currentUtt=u;btn.classList.add('speaking');btn.innerHTML=sIcon()+'Stop';setVS('speaking');u.onend=u.onerror=()=>{btn.classList.remove('speaking');btn.innerHTML=pIcon()+'Play reply';setVS(null);currentUtt=null;};speechSynthesis.speak(u);}
-function setVS(m){const el=document.getElementById('voice-status');const tx=document.getElementById('voice-status-text');el.className='voice-status';if(m==='listening'){el.classList.add('listening');tx.textContent='Listening — speak now...';}else if(m==='speaking'){el.classList.add('speaking');tx.textContent='Speaking reply...';}}
-function toggleMic(){if(listening){if(recognition)recognition.stop();return;}const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR){alert('Voice input requires Chrome on Android or Safari on iPhone.');return;}if(currentUtt)speechSynthesis.cancel();recognition=new SR();recognition.lang='en-US';recognition.interimResults=true;recognition.onstart=()=>{listening=true;document.getElementById('mic-btn').classList.add('listening');setVS('listening');document.getElementById('user-input').placeholder='Listening...';};recognition.onresult=e=>{const t=Array.from(e.results).map(r=>r[0].transcript).join('');document.getElementById('user-input').value=t;autoResize(document.getElementById('user-input'));};recognition.onend=()=>{listening=false;document.getElementById('mic-btn').classList.remove('listening');setVS(null);document.getElementById('user-input').placeholder='Type or tap mic to speak...';const t=document.getElementById('user-input').value.trim();if(t)setTimeout(()=>sendMessage(),300);};recognition.onerror=()=>{listening=false;document.getElementById('mic-btn').classList.remove('listening');setVS(null);document.getElementById('user-input').placeholder='Type or tap mic to speak...';};try{recognition.start();}catch(e){}}
-function autoResize(el){el.style.height='auto';el.style.height=Math.min(el.scrollHeight,80)+'px';}
-function handleKey(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMessage();}}
-function sendChip(t){document.getElementById('user-input').value=t;sendMessage();}
-function addUser(t){const d=document.createElement('div');d.className='msg user';d.innerHTML=`<div class="mav user">You</div><div class="bubble user">${esc(t)}</div>`;document.getElementById('messages').appendChild(d);scr();}
-function addBot(t){const c=t.replace(/<[^>]*>/g,'');const d=document.createElement('div');d.className='msg';d.innerHTML=`<div class="mav bot">AT</div><div class="bot-msg-wrap"><div class="bubble bot">${esc(t)}</div><button class="speak-btn" onclick="speakText(this,${JSON.stringify(c)})">${pIcon()}Play reply</button></div>`;document.getElementById('messages').appendChild(d);scr();if(autoSpeak){const b=d.querySelector('.speak-btn');setTimeout(()=>{if(b)speakText(b,c);},400);}}
-function addErr(t){const d=document.createElement('div');d.className='msg';d.innerHTML=`<div class="mav bot">AT</div><div class="bubble bot error">${esc(t)}</div>`;document.getElementById('messages').appendChild(d);scr();}
-function showTyping(){const d=document.createElement('div');d.className='msg';d.id='typing';d.innerHTML='<div class="mav bot">AT</div><div class="typing-bubble"><div class="tdot"></div><div class="tdot"></div><div class="tdot"></div></div>';document.getElementById('messages').appendChild(d);scr();}
-function removeTyping(){const t=document.getElementById('typing');if(t)t.remove();}
-function scr(){const m=document.getElementById('messages');m.scrollTop=m.scrollHeight;}
-function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');}
-async function sendMessage(){const input=document.getElementById('user-input');const text=input.value.trim();if(!text||loading)return;input.value='';input.style.height='auto';loading=true;document.getElementById('send-btn').disabled=true;document.getElementById('chips-wrap').style.display='none';addUser(text);history.push({role:'user',content:text});showTyping();try{const res=await fetch(PROXY_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1024,system:SYSTEM_PROMPT,messages:history})});removeTyping();if(!res.ok){addErr('Something went wrong. Please try again.');}else{const data=await res.json();const reply=data.content?.[0]?.text||"Could not generate a response. Please try again.";history.push({role:'assistant',content:reply});addBot(reply);}}catch(e){removeTyping();addErr('Connection error. Please check your internet and try again.');}loading=false;document.getElementById('send-btn').disabled=false;input.focus();}
-speechSynthesis.onvoiceschanged=()=>{};init();
+  } catch (error) {
+    btn.disabled = false;
+    btn.textContent = 'Submit and proceed to payment — $29.00';
+    showError('Something went wrong. Please try again or contact support on WhatsApp.');
+  }
+}
+
+// Smooth scroll
+document.querySelectorAll('a[href^="#"]').forEach(a => {
+  a.addEventListener('click', e => {
+    e.preventDefault();
+    document.querySelector(a.getAttribute('href'))?.scrollIntoView({ behavior: 'smooth' });
+  });
+});
 </script>
 </body>
 </html>
